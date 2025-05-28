@@ -21,7 +21,8 @@ public class SecurityConfig {
     ) throws Exception {
         http.csrf(CsrfConfigurer::disable)
                 .authorizeHttpRequests(authorizeRequests -> authorizeRequests
-                        .anyRequest().authenticated()
+                        .requestMatchers("/api/orders/new").authenticated()
+                        .anyRequest().permitAll()
                 )
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
                 .sessionManagement(sessionManagement -> sessionManagement.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
