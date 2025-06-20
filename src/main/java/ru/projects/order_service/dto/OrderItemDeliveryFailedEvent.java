@@ -1,6 +1,8 @@
 package ru.projects.order_service.dto;
 
+import java.util.UUID;
+
 public record OrderItemDeliveryFailedEvent(
-        Long orderItemId,
+        UUID orderItemId,
         String reason
 ) {}

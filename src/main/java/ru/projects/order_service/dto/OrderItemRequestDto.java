@@ -1,9 +1,10 @@
 package ru.projects.order_service.dto;
 
 import java.math.BigDecimal;
+import java.util.UUID;
 
 public record OrderItemRequestDto(
-        Long productVariationId,
+        UUID productVariationId,
         Integer quantity,
         BigDecimal unitPrice
 ) {
