@@ -12,9 +12,12 @@ import ru.projects.order_service.model.OrderItem;
 
 import java.math.BigDecimal;
 import java.time.Instant;
+import java.util.Set;
+import java.util.UUID;
 
 @Mapper(componentModel = "spring")
 public abstract class OrderMapper {
+
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "userId", ignore = true)
     @Mapping(target = "status", constant = "PENDING")
@@ -22,20 +25,33 @@ public abstract class OrderMapper {
     @Mapping(target = "totalPrice", ignore = true)
     @Mapping(target = "items", source = "orderItems")
     public abstract Order toOrder(OrderRequestDto orderRequestDto);
+
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "status", constant = "RESERVED")
     @Mapping(target = "deliveryTrackingNumber", ignore = true)
+    @Mapping(target = "estimatedDeliveryDate", ignore = true)
+    @Mapping(target = "deliveryDate", ignore = true)
+    @Mapping(target = "cancellationReason", ignore = true)
     @Mapping(target = "order", ignore = true)
     public abstract OrderItem toOrderItem(OrderItemRequestDto orderItemRequestDto);
+
     @Mapping(target = "orderId", source = "id")
     public abstract OrderCreatedEvent toOrderCreatedEvent(Order order);
+
     public abstract OrderCreatedEvent.Item toOrderCreatedEventItem(OrderItem orderItem);
+
     public abstract OrderResponseDto toOrderResponseDto(Order order);
+
     public abstract OrderItemResponseDto toOrderItemResponseDto(OrderItem orderItem);
+
+    public abstract OrderItemCancelledEvent toOrderItemCancelledEvent(OrderItemRequestDto orderItemRequestDto);
+
+    public abstract Set<OrderItemCancelledEvent> toOrderItemCancelledEventSet(Set<OrderItemRequestDto> orderItemRequestDtoSet);
+
     @AfterMapping
     protected void afterMapping(@MappingTarget Order order, OrderRequestDto orderRequestDto) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        Long userId = Long.valueOf(authentication.getPrincipal().toString());
+        UUID userId = UUID.fromString(authentication.getPrincipal().toString());
         order.setUserId(userId);
         order.setCreatedAt(Instant.now());
         BigDecimal totalPrice = order.getItems().stream()

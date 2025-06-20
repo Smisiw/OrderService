@@ -7,6 +7,8 @@ import lombok.Setter;
 import lombok.ToString;
 
 import java.math.BigDecimal;
+import java.time.Instant;
+import java.util.UUID;
 
 @Entity
 @Getter
@@ -15,10 +17,10 @@ import java.math.BigDecimal;
 @ToString(exclude = "order")
 public class OrderItem {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @GeneratedValue
+    private UUID id;
     @Column(nullable = false)
-    private Long productVariationId;
+    private UUID productVariationId;
     @Column(nullable = false)
     private Integer quantity;
     @Column(nullable = false)
@@ -26,6 +28,9 @@ public class OrderItem {
     @Column(nullable = false)
     private OrderItemStatus status;
     private String deliveryTrackingNumber;
+    private Instant estimatedDeliveryDate;
+    private Instant deliveryDate;
+    private String cancellationReason;
     @ManyToOne
     @JoinColumn(name = "order_id")
     private Order order;
