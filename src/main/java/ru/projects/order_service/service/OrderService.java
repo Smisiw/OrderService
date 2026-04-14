@@ -3,9 +3,14 @@ package ru.projects.order_service.service;
 import feign.FeignException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.support.TransactionSynchronization;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
+import org.springframework.web.server.ResponseStatusException;
 import ru.projects.order_service.dto.OrderItemCancelledEvent;
 import ru.projects.order_service.dto.OrderRequestDto;
 import ru.projects.order_service.dto.OrderResponseDto;
@@ -56,6 +61,16 @@ public class OrderService {
         Order order = orderRepository.findById(orderId).orElseThrow(
                 () -> new OrderNotFoundException("Order with id " + orderId + " not found")
         );
+
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        UUID currentUserId = (UUID) authentication.getPrincipal();
+        boolean isAdmin = authentication.getAuthorities()
+                .contains(new SimpleGrantedAuthority("ROLE_ADMIN"));
+
+        if (!isAdmin && !order.getUserId().equals(currentUserId)) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Access denied");
+        }
+
         return orderMapper.toOrderResponseDto(order);
     }
 }
